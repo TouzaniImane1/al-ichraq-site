@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Send, MapPin, Camera, Image as ImageIcon } from 'lucide-react';
+import { Users, MapPin, Camera, Image as ImageIcon } from 'lucide-react';
 
 // Composant pour simuler une photo vide dans la galerie
 const PhotoPlaceholder = ({ category }) => (
@@ -25,6 +25,17 @@ export default function AlIchraqSite() {
 
   const categories = ["All", "Moukhyam", "Events", "Sessions", "Trips"];
 
+  // Fonction pour scroller vers la section About
+  const scrollToAbout = () => {
+    setActiveTab('Home'); // On s'assure d'être sur la page d'accueil
+    setTimeout(() => {
+      const element = document.getElementById('about-section');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen bg-white font-sans text-gray-800">
       
@@ -38,22 +49,40 @@ export default function AlIchraqSite() {
         </div>
         
         <div className="hidden md:flex space-x-8 font-bold text-xs uppercase tracking-widest">
-          {['Home', 'About', 'Gallery', 'Join Us'].map(tab => (
-            <button 
-              key={tab} 
-              onClick={() => setActiveTab(tab)} 
-              className={`${activeTab === tab ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-400'} hover:text-blue-500 transition-all pb-1`}
-            >
-              {tab}
-            </button>
-          ))}
+          <button 
+            onClick={() => setActiveTab('Home')} 
+            className={`${activeTab === 'Home' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-400'} pb-1`}
+          >
+            Home
+          </button>
+          
+          <button 
+            onClick={scrollToAbout} 
+            className="text-gray-400 hover:text-blue-500 transition-all pb-1"
+          >
+            About
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('Gallery')} 
+            className={`${activeTab === 'Gallery' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-400'} pb-1`}
+          >
+            Gallery
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('Join Us')} 
+            className={`${activeTab === 'Join Us' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-400'} pb-1`}
+          >
+            Join Us
+          </button>
         </div>
       </nav>
 
       <main className="pt-32 pb-20 px-6 max-w-6xl mx-auto">
         
         {/* --- HOME & ABOUT --- */}
-        {(activeTab === 'Home' || activeTab === 'About') && (
+        {activeTab === 'Home' && (
           <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
             
             {/* LOGO SANS BORDURES ET GRAND */}
@@ -63,20 +92,23 @@ export default function AlIchraqSite() {
                   alt="Logo Al Ichraq" 
                   className="w-64 h-64 md:w-80 md:h-80 object-cover transition-transform hover:scale-105 duration-500"
                   style={{ 
-                    clipPath: 'circle(35%)', // Had l-sttar ghadi y9te3 l-byed li f l-jnab
+                    clipPath: 'circle(38%)', 
                     backgroundColor: 'transparent'
                   }} 
                 />
             </div>
             
-            <h2 className="text-4xl font-black text-blue-900 mb-6 underline decoration-orange-500 decoration-4 underline-offset-8">من نحن؟</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed rtl font-medium mb-16">
-              جمعية الإشراق فرع واد فاس هي جمعية تربوية، ثقافية واجتماعية تهدف إلى تأطير الطفولة والشباب وتنمية قدراتهم الإبداعية والتربوية من خلال أنشطة متنوعة طيلة السنة.
-            </p>
+            {/* ID AJOUTÉ ICI POUR LE SCROLL */}
+            <div id="about-section" className="pt-10">
+              <h2 className="text-4xl font-black text-blue-900 mb-6 underline decoration-orange-500 decoration-4 underline-offset-8 uppercase">من نحن؟</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed rtl font-medium mb-16">
+                جمعية الإشراق فرع واد فاس هي جمعية تربوية، ثقافية واجتماعية تهدف إلى تأطير الطفولة والشباب وتنمية قدراتهم الإبداعية والتربوية من خلال أنشطة متنوعة طيلة السنة.
+              </p>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="p-8 bg-gray-50 rounded-3xl hover:bg-white hover:shadow-xl transition-all duration-300">
-                <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 italic">
+                <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                    <Users className="text-blue-600" />
                 </div>
                 <h3 className="font-bold text-lg mb-2 uppercase tracking-tighter">Encadrement</h3>
@@ -162,16 +194,21 @@ export default function AlIchraqSite() {
 
       </main>
 
-      <footer className="bg-gray-900 text-white py-16 px-6">
+      <footer className="bg-gray-900 text-white py-16 px-6 border-t border-gray-800">
         <div className="max-w-4xl mx-auto text-center">
           <h3 className="text-xl font-black uppercase tracking-tighter mb-4 italic">Al Ichraq <span className="text-orange-500">Oued Fes</span></h3>
           <p className="text-[10px] opacity-40 leading-relaxed mb-8 uppercase tracking-widest font-bold italic">
             © 2026 Association Al Ichraq. Développé avec passion pour l'éducation et la culture.
           </p>
-          <div className="flex justify-center space-x-8 opacity-40 font-black text-[9px]">
-            <span>FACEBOOK</span>
-            <span>INSTAGRAM</span>
-            <span>YOUTUBE</span>
+          <div className="flex justify-center opacity-60 font-black text-[11px] tracking-[0.3em]">
+            <a 
+              href="https://www.instagram.com/al.ichraq_wed_fes/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="hover:text-orange-500 transition-colors uppercase"
+            >
+              Instagram
+            </a>
           </div>
         </div>
       </footer>
