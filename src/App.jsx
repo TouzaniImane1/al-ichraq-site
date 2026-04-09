@@ -106,7 +106,7 @@ export default function AlIchraqSite() {
               </div>
 
               {/* 3 BOXES - GRID RESPONSIVE (1 COL SUR MOBILE, 3 SUR PC) */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mt-20 md:mt-32 border-t border-gray-100 pt-16 md:pt-20">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mt-25 md:mt-20 border-t border-gray-100 pt-16 md:pt-20">
                 <div className="p-6 md:p-8 bg-gray-50 rounded-[2rem] hover:bg-white hover:shadow-xl transition-all">
                   <div className="w-12 h-12 md:w-14 md:h-14 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
                      <Users className="text-blue-600" />
