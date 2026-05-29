@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { auth, storage, db } from './firebase';
+import { auth, db } from './firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { collection, addDoc, serverTimestamp, onSnapshot, orderBy, query, deleteDoc, doc } from 'firebase/firestore';
 import { Lock, LogOut, Upload, CheckCircle, Loader, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
+const CLOUD_NAME = 'djp4sybde';
+const UPLOAD_PRESET = 'al-ichraq-gallery';
 
 export default function AdminPage() {
   const [user, setUser] = useState(null);
@@ -15,7 +17,6 @@ export default function AdminPage() {
   const [galleryItems, setGalleryItems] = useState([]);
   const navigate = useNavigate();
 
-  // Formulaire d'envoi
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Events');
   const [file, setFile] = useState(null);
@@ -44,41 +45,57 @@ export default function AdminPage() {
     if (!file) return;
 
     setUploading(true);
-    const storageRef = ref(storage, `gallery/${Date.now()}_${file.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
+    setProgress(0);
 
-    uploadTask.on('state_changed', 
-      (snapshot) => {
-        const p = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setProgress(p);
-      },
-      (error) => { console.error(error); setUploading(false); },
-      async () => {
-        const url = await getDownloadURL(uploadTask.snapshot.ref);
-        // Ajouter les infos dans Firestore
-        await addDoc(collection(db, "gallery"), {
-          title,
-          category,
-          imageUrl: url,
-          createdAt: serverTimestamp(),
-          type: file.type.includes('video') ? 'video' : 'image'
-        });
-        setUploading(false);
-        setTitle('');
-        setFile(null);
-        alert("Contenu ajouté avec succès !");
-      }
-    );
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', UPLOAD_PRESET);
+
+    const resourceType = file.type.includes('video') ? 'video' : 'image';
+    const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resourceType}/upload`;
+
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100));
+      };
+
+      const result = await new Promise((resolve, reject) => {
+        xhr.onload = () => {
+          if (xhr.status === 200) resolve(JSON.parse(xhr.responseText));
+          else reject(new Error('Upload échoué'));
+        };
+        xhr.onerror = () => reject(new Error('Erreur réseau'));
+        xhr.open('POST', url);
+        xhr.send(formData);
+      });
+
+      await addDoc(collection(db, 'gallery'), {
+        title,
+        category,
+        imageUrl: result.secure_url,
+        publicId: result.public_id,
+        createdAt: serverTimestamp(),
+        type: resourceType,
+      });
+
+      setTitle('');
+      setFile(null);
+      setProgress(0);
+      alert('Contenu ajouté avec succès !');
+    } catch (err) {
+      alert('Erreur upload : ' + err.message);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleDelete = async (item) => {
     if (!window.confirm(`Supprimer "${item.title}" ?`)) return;
     try {
-      const storageRef = ref(storage, item.imageUrl);
-      await deleteObject(storageRef).catch(() => {});
       await deleteDoc(doc(db, 'gallery', item.id));
     } catch (err) {
-      alert("Erreur lors de la suppression");
+      alert('Erreur lors de la suppression');
     }
   };
 
@@ -107,12 +124,12 @@ export default function AdminPage() {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-12">
           <h1 className="text-3xl font-black text-blue-900 uppercase italic">Gestion Galerie</h1>
-          <button onClick={() => signOut(auth)} className="flex items-center gap-2 text-red-500 font-bold text-sm"><LogOut size={18}/> Quitter</button>
+          <button onClick={() => { signOut(auth); setUser(null); }} className="flex items-center gap-2 text-red-500 font-bold text-sm"><LogOut size={18}/> Quitter</button>
         </div>
 
         <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-right rtl"><Upload className="text-orange-500"/> إضافة محتوى جديد (27 رمضان مثلا)</h2>
-          
+          <h2 className="text-xl font-bold mb-6 flex items-center gap-2"><Upload className="text-orange-500"/> إضافة محتوى جديد</h2>
+
           <form onSubmit={handleUpload} className="space-y-6">
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Titre de l'activité</label>
@@ -136,19 +153,21 @@ export default function AdminPage() {
             </div>
 
             {uploading && (
-              <div className="w-full bg-gray-100 h-4 rounded-full overflow-hidden">
-                <div className="bg-blue-600 h-full transition-all" style={{ width: `${progress}%` }}></div>
+              <div>
+                <div className="w-full bg-gray-100 h-4 rounded-full overflow-hidden">
+                  <div className="bg-blue-600 h-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
+                </div>
+                <p className="text-xs text-gray-400 mt-1 text-center">{progress}%</p>
               </div>
             )}
 
-            <button disabled={uploading} className="w-full bg-orange-500 text-white py-5 rounded-2xl font-black shadow-lg hover:bg-orange-600 transition-all flex items-center justify-center gap-3">
+            <button disabled={uploading} className="w-full bg-orange-500 text-white py-5 rounded-2xl font-black shadow-lg hover:bg-orange-600 transition-all flex items-center justify-center gap-3 disabled:opacity-60">
               {uploading ? <Loader className="animate-spin" /> : <CheckCircle />}
               {uploading ? 'ENVOI EN COURS...' : 'PUBLIER SUR LE SITE'}
             </button>
           </form>
         </div>
 
-        {/* --- LISTE DES CONTENUS PUBLIÉS --- */}
         {galleryItems.length > 0 && (
           <div className="mt-10 bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
             <h2 className="text-lg font-black text-blue-900 uppercase mb-6">Contenus publiés ({galleryItems.length})</h2>
