@@ -113,13 +113,16 @@ const MainSite = () => {
                   <h3 className="font-black text-md md:text-lg mb-2 uppercase text-blue-900">Activités</h3>
                   <p className="text-xs md:text-sm text-gray-500 font-bold leading-relaxed">برامج متنوعة : مخيمات، ورشات، أناشيد وخرجات</p>
                 </div>
-                <div className="p-6 md:p-8 bg-gray-50 rounded-[2rem] hover:bg-white hover:shadow-xl transition-all">
+                <a href="https://maps.app.goo.gl/dar-chabab-oued-fes" target="_blank" rel="noopener noreferrer"
+                   onClick={e => { e.preventDefault(); window.open('https://www.google.com/maps/place/دار+الشباب+واد+فاس+maison+de+la+jeunesse+oued+frs/data=!4m2!3m1!1s0x0:0x2b6b2f250df878a1', '_blank'); }}
+                   className="p-6 md:p-8 bg-gray-50 rounded-[2rem] hover:bg-white hover:shadow-xl transition-all cursor-pointer block">
                   <div className="w-12 h-12 md:w-14 md:h-14 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6">
                     <MapPin className="text-green-500" />
                   </div>
                   <h3 className="font-black text-md md:text-lg mb-2 uppercase text-blue-900">Localisation</h3>
                   <p className="text-xs md:text-sm text-gray-500 font-bold leading-relaxed">واد فاس، مدينة فاس - المملكة المغربية</p>
-                </div>
+                  <p className="text-[10px] text-green-500 font-bold mt-2">📍 Voir sur Google Maps</p>
+                </a>
               </div>
             </div>
           </motion.section>
