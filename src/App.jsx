@@ -75,7 +75,7 @@ const MainSite = () => {
         {activeTab === 'Home' && (
           <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
             <div className="mb-8 md:mb-12 flex justify-center">
-              <img src="/logo.jpeg" alt="Logo Al Ichraq" className="w-48 h-48 md:w-80 md:h-80 object-cover" style={{ clipPath: 'circle(38%)' }} />
+              <img src="/logo.jpeg" alt="Logo Al Ichraq" className="w-56 h-56 md:w-80 md:h-80 object-contain" />
             </div>
             <div className="max-w-4xl mx-auto mb-16 md:mb-20">
               <h2 className="text-3xl md:text-4xl font-black text-blue-900 mb-6 underline decoration-orange-500 decoration-4 underline-offset-8">التعريف</h2>
