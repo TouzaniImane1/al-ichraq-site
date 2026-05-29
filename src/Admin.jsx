@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { collection, addDoc, serverTimestamp, onSnapshot, orderBy, query, deleteDoc, doc } from 'firebase/firestore';
-import { Lock, LogOut, Upload, CheckCircle, Loader, Trash2 } from 'lucide-react';
+import { collection, addDoc, serverTimestamp, onSnapshot, orderBy, query, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { Lock, LogOut, Upload, CheckCircle, Loader, Trash2, Pencil } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const CLOUD_NAME = 'djp4sybde';
@@ -87,6 +87,16 @@ export default function AdminPage() {
       alert('Erreur upload : ' + err.message);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleRename = async (item) => {
+    const newTitle = window.prompt('Nouveau titre :', item.title);
+    if (!newTitle || newTitle.trim() === item.title) return;
+    try {
+      await updateDoc(doc(db, 'gallery', item.id), { title: newTitle.trim() });
+    } catch (err) {
+      alert('Erreur lors de la modification');
     }
   };
 
@@ -183,12 +193,14 @@ export default function AdminPage() {
                     <p className="text-xs font-bold truncate text-gray-700">{item.title}</p>
                     <span className="text-[9px] text-orange-500 font-bold uppercase">{item.category}</span>
                   </div>
-                  <button
-                    onClick={() => handleDelete(item)}
-                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
-                  >
-                    <Trash2 size={13} />
-                  </button>
+                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => handleRename(item)} className="bg-blue-500 text-white rounded-full p-1.5 shadow-md">
+                      <Pencil size={13} />
+                    </button>
+                    <button onClick={() => handleDelete(item)} className="bg-red-500 text-white rounded-full p-1.5 shadow-md">
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
